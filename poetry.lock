@@ -179,7 +179,7 @@ description = "A simple logging library with JSON log formatting"
 name = "logtron"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-version = "0.1.2"
+version = "0.1.3"
 
 [package.dependencies]
 importlib-metadata = ">=1.7.0,<2.0.0"
@@ -425,7 +425,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["pathlib2", "unittest2", "jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "92ee3cc416edc3ace659de20f32d450674ba18c8ceabf191e47a442c32715b34"
+content-hash = "9a8fe63fc87d4eeceea464d509e156bbb243740edd528662960c362e1fb71ebc"
 lock-version = "1.0"
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -560,8 +560,8 @@ jmespath = [
     {file = "jmespath-0.10.0.tar.gz", hash = "sha256:b85d0567b8666149a93172712e68920734333c0ce7e89b78b3e987f71e5ed4f9"},
 ]
 logtron = [
-    {file = "logtron-0.1.2-py2.py3-none-any.whl", hash = "sha256:59772d70e6f5cc90bf9a6fe9ed1437ecf33c2826ed99fe3403d81b510e100c1c"},
-    {file = "logtron-0.1.2.tar.gz", hash = "sha256:8f8e4c6b0ace6c0f78e476fb9c6aef55a546fd2553e4af32df44f065114aabf2"},
+    {file = "logtron-0.1.3-py2.py3-none-any.whl", hash = "sha256:089f98b850a94b5e4bd546721e6774ae19de8b6acc920ee7b7b995da47eb117b"},
+    {file = "logtron-0.1.3.tar.gz", hash = "sha256:20f5f9ea0314327af2bdf6b884c057ad32c534711b0772a3f9c6e8b3c67b7f78"},
 ]
 more-itertools = [
     {file = "more-itertools-5.0.0.tar.gz", hash = "sha256:38a936c0a6d98a38bcc2d03fdaaedaba9f412879461dd2ceff8d37564d6522e4"},
