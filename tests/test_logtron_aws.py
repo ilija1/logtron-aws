@@ -24,7 +24,12 @@ def test_context():
 
 
 def test_autodiscover():
-    logger = autodiscover(refresh=True, discover_context=lambda: discover_context(sts_client=MockSTSClient()))
+    config = {
+        "handlers": ["logtron.handlers.ConsoleHandler"],
+    }
+    logger = autodiscover(
+        refresh=True, config=config, discover_context=lambda: discover_context(sts_client=MockSTSClient())
+    )
     logger.info("hello")
 
 

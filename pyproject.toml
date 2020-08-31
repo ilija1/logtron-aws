@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "logtron-aws"
-version = "0.1.0"
+version = "0.1.1"
 description = "AWS CloudWatch logging and context auto-discovery for logtron"
 authors = ["Ilija Stevcev <ilija1@gmail.com>"]
 license = "Apache-2.0"
