@@ -100,6 +100,9 @@ class CloudWatchHandler(Handler):
         self.batch_size += size
         self.batch.append(log_entry)
 
+    def flush(self):
+        self.__submit_batch()
+
     def close(self):
         self.__submit_batch()
         super(CloudWatchHandler, self).close()
