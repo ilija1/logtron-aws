@@ -27,8 +27,10 @@ Logtron-AWS provides a set of extensions for the [Logtron](https://github.com/il
 [![Downloads](https://pepy.tech/badge/logtron-aws/month)](https://pepy.tech/project/logtron-aws/month)
 [![Supported Versions](https://img.shields.io/pypi/pyversions/logtron-aws.svg)](https://pypi.org/project/logtron-aws)
 [![Contributors](https://img.shields.io/github/contributors/ilija1/logtron-aws.svg)](https://github.com/ilija1/logtron-aws/graphs/contributors)
+
 [![Build Status](https://travis-ci.org/ilija1/logtron-aws.svg?branch=master)](https://travis-ci.org/ilija1/logtron-aws)
 [![codecov](https://codecov.io/gh/ilija1/logtron-aws/branch/master/graph/badge.svg)](https://codecov.io/gh/ilija1/logtron-aws)
+[![Documentation Status](https://readthedocs.org/projects/logtron-aws/badge/?version=latest)](https://logtron-aws.readthedocs.io/en/latest/?badge=latest)
 
 ## Installing Logtron-AWS and Supported Versions
 
