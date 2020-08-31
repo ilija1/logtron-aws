@@ -1,11 +1,15 @@
 .PHONY: clean
 clean:
 	@find . | grep -E "(__pycache__|\.pyc|\.pyo$$)" | xargs rm -rf
-	@rm -rf .pytest_cache *.egg-info .coverage coverage.xml dist
+	@rm -rf .pytest_cache *.egg-info .coverage coverage.xml report.xml junit htmlcov dist
 
 .PHONY: test
 test: clean
 	poetry run pytest -s
+
+.PHONY: ci
+ci: clean
+	poetry run pytest --junitxml=report.xml
 
 .PHONY: cover
 cover: clean
