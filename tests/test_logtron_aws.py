@@ -68,3 +68,5 @@ def test_cloudwatch():
         refresh=True, config=config, discover_context=lambda: discover_context(sts_client=MockSTSClient())
     )
     logger.info("test_cloudwatch")
+
+    [i.flush() for i in logging.getLogger().handlers]
