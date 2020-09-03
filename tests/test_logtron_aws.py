@@ -30,7 +30,7 @@ def test_autodiscover():
     logger = autodiscover(
         refresh=True, config=config, discover_context=lambda: discover_context(sts_client=MockSTSClient())
     )
-    logger.info("hello")
+    logger.info("test_autodiscover")
 
 
 def test_cloudwatch():
@@ -67,6 +67,4 @@ def test_cloudwatch():
     logger = autodiscover(
         refresh=True, config=config, discover_context=lambda: discover_context(sts_client=MockSTSClient())
     )
-    logger.info("hello")
-
-    [i.flush() for i in logging.getLogger().handlers]
+    logger.info("test_cloudwatch")
