@@ -3,19 +3,7 @@ import logging
 from logtron_aws import CloudWatchHandler
 from logtron_aws import discover_context
 from logtron_aws import autodiscover
-
-
-class MockSTSClientMeta:
-    def __init__(self):
-        self.region_name = "us-east-1"
-
-
-class MockSTSClient:
-    def __init__(self):
-        self.meta = MockSTSClientMeta()
-
-    def get_caller_identity(self):
-        return {"Arn": "arn:aws:sts::123456789012:assumed-role/foo/session1"}
+from tests.mocks import MockSTSClient, MockLogsClient
 
 
 def test_context():
@@ -34,32 +22,10 @@ def test_autodiscover():
 
 
 def test_cloudwatch():
-    class MockLogsPaginator:
-        def __init__(self):
-            pass
-
-        def paginate(self, **kwargs):
-            return []
-
-    class MockLogsClient:
-        def __init__(self):
-            pass
-
-        def get_paginator(self, name):
-            return MockLogsPaginator()
-
-        def create_log_group(self, **kwargs):
-            pass
-
-        def create_log_stream(self, **kwargs):
-            pass
-
-        def put_log_events(self, **kwargs):
-            return {"nextSequenceToken": "123"}
 
     config = {
         "handlers": ["logtron_aws.CloudWatchHandler"],
-        "logtron_aws.CloudWatchHandler": {
+        "CloudWatchHandler": {
             "logs_client": MockLogsClient(),
             "interval_sec": 30,
         },
@@ -67,6 +33,35 @@ def test_cloudwatch():
     logger = autodiscover(
         refresh=True, config=config, discover_context=lambda: discover_context(sts_client=MockSTSClient())
     )
-    logger.info("test_cloudwatch")
+    logger.info("test_cloudwatch", extra={"test123": 123})
+
+    [i.flush() for i in logging.getLogger().handlers]
+
+
+def test_cloudwatch_emf():
+
+    config = {
+        "handlers": ["logtron_aws.CloudWatchHandler"],
+        "CloudWatchHandler": {
+            "logs_client": MockLogsClient(),
+            "interval_sec": 30,
+            "emf_namespace": "bobo",
+            "emf_dimensions": ["kind", "smop"],
+            "emf_metrics": [
+                {
+                    "Name": "value",
+                    "Unit": "Count",
+                },
+                {
+                    "Name": "fake",
+                    "Unit": "Milliseconds",
+                },
+            ],
+        },
+    }
+    logger = autodiscover(
+        refresh=True, config=config, discover_context=lambda: discover_context(sts_client=MockSTSClient())
+    )
+    logger.info("test_cloudwatch_emf", extra={"kind": "test", "value": 123})
 
     [i.flush() for i in logging.getLogger().handlers]

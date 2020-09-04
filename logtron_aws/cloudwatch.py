@@ -12,7 +12,16 @@ class CloudWatchHandler(Handler):
     EXTRA_BYTES_PER_EVENT = 26
     REQUESTS_PER_SECOND = 5
 
-    def __init__(self, context, logs_client=None, interval_sec=1.0, retention_days=None):
+    def __init__(
+        self,
+        context,
+        logs_client=None,
+        interval_sec=1.0,
+        retention_days=None,
+        emf_namespace=None,
+        emf_dimensions=[],
+        emf_metrics=[],
+    ):
         super(CloudWatchHandler, self).__init__()
         self.context = context
         self.batch = []
@@ -20,11 +29,14 @@ class CloudWatchHandler(Handler):
         self.interval_sec = max(interval_sec, 1.0 / CloudWatchHandler.REQUESTS_PER_SECOND)
         self.retention_days = retention_days
         self.client = logs_client if logs_client is not None else boto3.client("logs")
+        self.emf_namespace = emf_namespace if emf_namespace is not None else self.context["id"]
+        self.emf_dimensions = emf_dimensions
+        self.emf_metrics = emf_metrics
         self.log_group = self.context["id"]
         self.sequence_token = None
 
         self.__create_log_group()
-        self.__create_log_stream()
+        self.stream_exists = False
 
         thread = threading.Thread(target=self.__timed_submit, args=())
         thread.daemon = True
@@ -55,6 +67,7 @@ class CloudWatchHandler(Handler):
             logGroupName=self.log_group,
             logStreamName=self.log_stream,
         )
+        self.stream_exists = True
 
     def __timed_submit(self):
         while True:
@@ -66,6 +79,9 @@ class CloudWatchHandler(Handler):
         if len(self.batch) == 0:
             self.release()
             return
+
+        if not self.stream_exists:
+            self.__create_log_stream()
 
         args = {
             "logGroupName": self.log_group,
@@ -86,6 +102,28 @@ class CloudWatchHandler(Handler):
         json_obj = json.loads(self.format(record))
         timestamp = json_obj["timestamp"]
         json_obj.pop("timestamp")
+
+        extra = {}
+        if "extra" in json_obj:
+            extra = json_obj["extra"].copy()
+            json_obj.update(extra)
+            json_obj.pop("extra")
+
+        if len(extra) > 0 and len(self.emf_metrics) > 0:
+            dimensions = [i for i in self.emf_dimensions if i in extra]
+            metrics = [i for i in self.emf_metrics if i["Name"] in extra]
+            if len(metrics) > 0:
+                json_obj["_aws"] = {
+                    "Timestamp": timestamp,
+                    "CloudWatchMetrics": [
+                        {
+                            "Namespace": self.emf_namespace,
+                            "Dimensions": dimensions,
+                            "Metrics": metrics,
+                        }
+                    ],
+                }
+
         message = json.dumps(json_obj)
 
         log_entry = {
