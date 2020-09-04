@@ -3,7 +3,7 @@ import logging
 from logtron_aws import CloudWatchHandler
 from logtron_aws import discover_context
 from logtron_aws import autodiscover
-from tests.mocks import MockSTSClient, MockLogsClient
+from tests.mocks import MockSTSClient, MockLogsClient, MockLogsPaginator
 
 
 def test_context():
@@ -63,5 +63,39 @@ def test_cloudwatch_emf():
         refresh=True, config=config, discover_context=lambda: discover_context(sts_client=MockSTSClient())
     )
     logger.info("test_cloudwatch_emf", extra={"kind": "test", "value": 123})
+
+    [i.flush() for i in logging.getLogger().handlers]
+
+
+def test_cloudwatch_close():
+
+    config = {
+        "handlers": ["logtron_aws.CloudWatchHandler"],
+        "CloudWatchHandler": {
+            "logs_client": MockLogsClient(),
+            "interval_sec": 30,
+        },
+    }
+    logger = autodiscover(
+        refresh=True, config=config, discover_context=lambda: discover_context(sts_client=MockSTSClient())
+    )
+    logger.info("test_cloudwatch_close", extra={"test123": 123})
+
+    [i.close() for i in logging.getLogger().handlers]
+
+
+def test_cloudwatch_existing_log_group():
+
+    config = {
+        "handlers": ["logtron_aws.CloudWatchHandler"],
+        "CloudWatchHandler": {
+            "logs_client": MockLogsClient(MockLogsPaginator([{"logGroups": ["foo"]}])),
+            "interval_sec": 30,
+        },
+    }
+    logger = autodiscover(
+        refresh=True, config=config, discover_context=lambda: discover_context(sts_client=MockSTSClient())
+    )
+    logger.info("test_cloudwatch_existing_log_group", extra={"test123": 123})
 
     [i.flush() for i in logging.getLogger().handlers]
