@@ -12,19 +12,20 @@ class MockSTSClient:
 
 
 class MockLogsPaginator:
-    def __init__(self):
-        pass
+    def __init__(self, items=[]):
+        self.items = items
 
     def paginate(self, **kwargs):
-        return []
+        for i in self.items:
+            yield i
 
 
 class MockLogsClient:
-    def __init__(self):
-        pass
+    def __init__(self, paginator=None):
+        self.paginator = paginator if paginator is not None else MockLogsPaginator()
 
     def get_paginator(self, name):
-        return MockLogsPaginator()
+        return self.paginator
 
     def create_log_group(self, **kwargs):
         pass

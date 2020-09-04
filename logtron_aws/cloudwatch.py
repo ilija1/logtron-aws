@@ -12,26 +12,19 @@ class CloudWatchHandler(Handler):
     EXTRA_BYTES_PER_EVENT = 26
     REQUESTS_PER_SECOND = 5
 
-    def __init__(
-        self,
-        context,
-        logs_client=None,
-        interval_sec=1.0,
-        retention_days=None,
-        emf_namespace=None,
-        emf_dimensions=[],
-        emf_metrics=[],
-    ):
+    def __init__(self, context, **kwargs):
         super(CloudWatchHandler, self).__init__()
         self.context = context
         self.batch = []
         self.batch_size = 0
-        self.interval_sec = max(interval_sec, 1.0 / CloudWatchHandler.REQUESTS_PER_SECOND)
-        self.retention_days = retention_days
-        self.client = logs_client if logs_client is not None else boto3.client("logs")
-        self.emf_namespace = emf_namespace if emf_namespace is not None else self.context["id"]
-        self.emf_dimensions = emf_dimensions
-        self.emf_metrics = emf_metrics
+        self.interval_sec = max(kwargs.get("interval_sec", 1.0), 1.0 / CloudWatchHandler.REQUESTS_PER_SECOND)
+        self.retention_days = kwargs.get("retention_days")
+        self.client = kwargs.get("logs_client")
+        if self.client is None:
+            self.client = boto3.client("logs")
+        self.emf_namespace = kwargs.get("emf_namespace", self.context["id"])
+        self.emf_dimensions = kwargs.get("emf_dimensions", [])
+        self.emf_metrics = kwargs.get("emf_metrics", [])
         self.log_group = self.context["id"]
         self.sequence_token = None
 
@@ -98,31 +91,36 @@ class CloudWatchHandler(Handler):
         self.batch_size = 0
         self.release()
 
+    def __get_emf(self, timestamp, extra):
+        if len(extra) == 0 or len(self.emf_metrics) == 0:
+            return {}
+
+        dimensions = [i for i in self.emf_dimensions if i in extra]
+        metrics = [i for i in self.emf_metrics if i["Name"] in extra]
+        if len(metrics) == 0:
+            return {}
+
+        return {
+            "_aws": {
+                "Timestamp": timestamp,
+                "CloudWatchMetrics": [
+                    {
+                        "Namespace": self.emf_namespace,
+                        "Dimensions": dimensions,
+                        "Metrics": metrics,
+                    }
+                ],
+            }
+        }
+
     def emit(self, record):
         json_obj = json.loads(self.format(record))
-        timestamp = json_obj["timestamp"]
-        json_obj.pop("timestamp")
+        timestamp = json_obj.pop("timestamp")
+        extra = json_obj.pop("extra", {})
+        json_obj.update(extra)
 
-        extra = {}
-        if "extra" in json_obj:
-            extra = json_obj["extra"].copy()
-            json_obj.update(extra)
-            json_obj.pop("extra")
-
-        if len(extra) > 0 and len(self.emf_metrics) > 0:
-            dimensions = [i for i in self.emf_dimensions if i in extra]
-            metrics = [i for i in self.emf_metrics if i["Name"] in extra]
-            if len(metrics) > 0:
-                json_obj["_aws"] = {
-                    "Timestamp": timestamp,
-                    "CloudWatchMetrics": [
-                        {
-                            "Namespace": self.emf_namespace,
-                            "Dimensions": dimensions,
-                            "Metrics": metrics,
-                        }
-                    ],
-                }
+        emf = self.__get_emf(timestamp, extra)
+        json_obj.update(emf)
 
         message = json.dumps(json_obj)
 
