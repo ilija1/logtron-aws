@@ -1,3 +1,4 @@
+import itertools
 import json
 import threading
 import time
@@ -95,10 +96,19 @@ class CloudWatchHandler(Handler):
         if len(extra) == 0 or len(self.emf_metrics) == 0:
             return {}
 
-        dimensions = [i for i in self.emf_dimensions if i in extra]
         metrics = [i for i in self.emf_metrics if i["Name"] in extra]
         if len(metrics) == 0:
             return {}
+
+        dimensions = []
+        for i in self.emf_dimensions:
+            if type(i) != list:
+                continue
+            dimension = [j for j in i if j in extra]
+            if len(dimension) > 0:
+                dimensions.append(dimension)
+        dimensions.sort()
+        dimensions = list(k for k, _ in itertools.groupby(dimensions))
 
         return {
             "_aws": {

@@ -1,9 +1,7 @@
 import logging
 
-from logtron_aws import CloudWatchHandler
-from logtron_aws import discover_context
-from logtron_aws import autodiscover
-from tests.mocks import MockSTSClient, MockLogsClient, MockLogsPaginator
+from logtron_aws import CloudWatchHandler, autodiscover, discover_context
+from tests.mocks import MockLogsClient, MockLogsPaginator, MockSTSClient
 
 
 def test_context():
@@ -46,7 +44,7 @@ def test_cloudwatch_emf():
             "logs_client": MockLogsClient(),
             "interval_sec": 30,
             "emf_namespace": "bobo",
-            "emf_dimensions": ["kind", "smop"],
+            "emf_dimensions": [["kind", "smop"], ["kind"], "value"],
             "emf_metrics": [
                 {
                     "Name": "value",

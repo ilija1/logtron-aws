@@ -1,8 +1,9 @@
 import logging
+
 from importlib_metadata import version
+from logtron import autodiscover as autodiscover_base
 
 from logtron_aws.cloudwatch import CloudWatchHandler
-from logtron import autodiscover as autodiscover_base
 
 try:
     __version__ = version(__package__)
@@ -32,7 +33,7 @@ def autodiscover(name=None, level=logging.INFO, **kwargs):
     if logs_client is not None:
         config.update(
             {
-                "logtron_aws.cloudwatch.CloudWatchHandler": {"logs_client": logs_client},
+                "CloudWatchHandler": {"logs_client": logs_client},
             }
         )
 

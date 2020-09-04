@@ -34,4 +34,5 @@ class MockLogsClient:
         pass
 
     def put_log_events(self, **kwargs):
+        [print(i) for i in kwargs["logEvents"]]
         return {"nextSequenceToken": "123"}
