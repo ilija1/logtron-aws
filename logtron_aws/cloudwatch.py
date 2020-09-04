@@ -19,7 +19,9 @@ class CloudWatchHandler(Handler):
         self.batch_size = 0
         self.interval_sec = max(kwargs.get("interval_sec", 1.0), 1.0 / CloudWatchHandler.REQUESTS_PER_SECOND)
         self.retention_days = kwargs.get("retention_days")
-        self.client = kwargs.get("logs_client", boto3.client("logs"))
+        self.client = kwargs.get("logs_client")
+        if self.client is None:
+            self.client = boto3.client("logs")
         self.emf_namespace = kwargs.get("emf_namespace", self.context["id"])
         self.emf_dimensions = kwargs.get("emf_dimensions", [])
         self.emf_metrics = kwargs.get("emf_metrics", [])
