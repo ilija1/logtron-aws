@@ -7,18 +7,16 @@ from logtron import autodiscover as autodiscover_base
 try:
     __version__ = version(__package__)
 except:
-    pass
+    __version__ = "unspecified"
 
 
-def autodiscover(
-    name=None,
-    level=logging.INFO,
-    config=None,
-    refresh=False,
-    logs_client=None,
-    sts_client=None,
-    discover_context=None,
-):
+def autodiscover(name=None, level=logging.INFO, **kwargs):
+    config = kwargs.get("config")
+    refresh = kwargs.get("refresh", False)
+    logs_client = kwargs.get("logs_client")
+    sts_client = kwargs.get("sts_client")
+    discover_context = kwargs.get("discover_context")
+
     if config is not None:
         config = config.copy()
     else:
