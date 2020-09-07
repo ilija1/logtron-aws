@@ -15,8 +15,8 @@ stages:
 
 before_install:
   - pip install --upgrade pip
-  - pip install --user poetry
-  - pip install --user codecov
+  - pip install poetry
+  - pip install codecov
 install:
   - poetry install --no-root -v
 script:
@@ -32,6 +32,7 @@ jobs:
       dist: xenial
       python: "3.8"
       script: skip
+      after_success: skip
       deploy:
         provider: script
         script: poetry publish -u __token__ -p $PYPI_PASSWORD -n --build
