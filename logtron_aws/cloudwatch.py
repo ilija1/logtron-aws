@@ -7,15 +7,16 @@ from uuid import uuid4
 
 import boto3
 
+from logtron_aws.util import path_get
+
 
 class CloudWatchHandler(Handler):
     MAX_BATCH_SIZE = 1048576
     EXTRA_BYTES_PER_EVENT = 26
     REQUESTS_PER_SECOND = 5
 
-    def __init__(self, context, **kwargs):
+    def __init__(self, **kwargs):
         super(CloudWatchHandler, self).__init__()
-        self.context = context
         self.batch = []
         self.batch_size = 0
         self.interval_sec = max(kwargs.get("interval_sec", 1.0), 1.0 / CloudWatchHandler.REQUESTS_PER_SECOND)
@@ -23,20 +24,26 @@ class CloudWatchHandler(Handler):
         self.client = kwargs.get("logs_client")
         if self.client is None:
             self.client = boto3.client("logs")
-        self.emf_namespace = kwargs.get("emf_namespace", self.context["id"])
+        self.emf_namespace = kwargs.get("emf_namespace")
         self.emf_dimensions = kwargs.get("emf_dimensions", [])
         self.emf_metrics = kwargs.get("emf_metrics", [])
-        self.log_group = self.context["id"]
+        self.emf_header_registered = False
+        self.log_group = kwargs.get("log_group")
+        self.log_group_initialized = False
+        self.log_stream = None
         self.sequence_token = None
-
-        self.__create_log_group()
-        self.stream_exists = False
 
         thread = threading.Thread(target=self.__timed_submit, args=())
         thread.daemon = True
         thread.start()
 
-    def __create_log_group(self):
+    def __create_log_group(self, record):
+        if self.log_group_initialized:
+            return
+
+        if self.log_group is None:
+            self.log_group, _ = path_get(record, "context.id")
+
         exists = False
         paginator = self.client.get_paginator("describe_log_groups")
         for i in paginator.paginate(logGroupNamePrefix=self.log_group):
@@ -54,14 +61,20 @@ class CloudWatchHandler(Handler):
             )
             if self.retention_days is not None:
                 self.client.put_retention_policy(logGroupName=self.log_group, retentionInDays=self.retention_days)
+        self.log_group_initialized = True
 
-    def __create_log_stream(self):
+    def __create_log_stream(self, record):
+        if not self.log_group_initialized:
+            self.__create_log_group(record)
+
+        if self.log_stream is not None:
+            return
+
         self.log_stream = "logtron-{}".format(str(uuid4()))
         self.client.create_log_stream(
             logGroupName=self.log_group,
             logStreamName=self.log_stream,
         )
-        self.stream_exists = True
 
     def __timed_submit(self):
         while True:
@@ -74,9 +87,6 @@ class CloudWatchHandler(Handler):
             self.release()
             return
 
-        if not self.stream_exists:
-            self.__create_log_stream()
-
         args = {
             "logGroupName": self.log_group,
             "logStreamName": self.log_stream,
@@ -85,6 +95,10 @@ class CloudWatchHandler(Handler):
         if self.sequence_token is not None:
             args["sequenceToken"] = self.sequence_token
 
+        if not self.emf_header_registered and len(self.emf_metrics) > 0:
+            self.client.meta.events.register_first("before-sign.cloudwatch-logs.PutLogEvents", self.__add_emf_header)
+            self.emf_header_registered = True
+
         response = self.client.put_log_events(**args)
         self.sequence_token = response["nextSequenceToken"]
 
@@ -92,11 +106,14 @@ class CloudWatchHandler(Handler):
         self.batch_size = 0
         self.release()
 
-    def __get_emf(self, timestamp, extra):
-        if len(extra) == 0 or len(self.emf_metrics) == 0:
+    def __add_emf_header(self, request, **kwargs):
+        request.headers.add_header("x-amzn-logs-format", "json/emf")
+
+    def __get_emf(self, timestamp, record):
+        if len(self.emf_metrics) == 0:
             return {}
 
-        metrics = [i for i in self.emf_metrics if i["Name"] in extra]
+        metrics = [i for i in self.emf_metrics if i["Name"] in record]
         if len(metrics) == 0:
             return {}
 
@@ -104,11 +121,14 @@ class CloudWatchHandler(Handler):
         for i in self.emf_dimensions:
             if type(i) != list:
                 continue
-            dimension = [j for j in i if j in extra]
+            dimension = [j for j in i if j in record]
             if len(dimension) > 0:
                 dimensions.append(dimension)
         dimensions.sort()
         dimensions = list(k for k, _ in itertools.groupby(dimensions))
+
+        if self.emf_namespace is None:
+            self.emf_namespace, _ = path_get(record, "context.id")
 
         return {
             "_aws": {
@@ -126,10 +146,16 @@ class CloudWatchHandler(Handler):
     def emit(self, record):
         json_obj = json.loads(self.format(record))
         timestamp = json_obj.pop("timestamp")
+
+        if self.log_stream is None:
+            self.__create_log_stream(json_obj)
+
+        # Scrub out any "extra" objects or prefixes
+        json_obj = {k.replace("extra_", "") if k.startswith("extra_") else k: v for k, v in json_obj.items()}
         extra = json_obj.pop("extra", {})
         json_obj.update(extra)
 
-        emf = self.__get_emf(timestamp, extra)
+        emf = self.__get_emf(timestamp, json_obj)
         json_obj.update(emf)
 
         message = json.dumps(json_obj)

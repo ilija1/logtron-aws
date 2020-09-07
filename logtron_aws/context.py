@@ -1,7 +1,16 @@
 import boto3
 
+cached_context = None
 
-def discover_context(sts_client=None):
+
+def discover_context(sts_client=None, refresh=False):
+    global cached_context
+
+    if cached_context is not None and not refresh:
+        return cached_context
+
+    # TODO: see if you can identify lambda, glue, batch, ec2, etc
+
     sts_client = sts_client if sts_client is not None else boto3.client("sts")
     response = sts_client.get_caller_identity()
     arn = response["Arn"]
@@ -20,5 +29,7 @@ def discover_context(sts_client=None):
 
     if type == "assumed-role" and len(parts) > 2:
         context["session_name"] = parts[2]
+
+    cached_context = context
 
     return context

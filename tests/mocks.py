@@ -1,11 +1,9 @@
-class MockSTSClientMeta:
-    def __init__(self):
-        self.region_name = "us-east-1"
+from collections import namedtuple
 
 
 class MockSTSClient:
     def __init__(self):
-        self.meta = MockSTSClientMeta()
+        self.meta = namedtuple("meta", "region_name")._make(["us-east-1"])
 
     def get_caller_identity(self):
         return {"Arn": "arn:aws:sts::123456789012:assumed-role/foo/session1"}
@@ -23,6 +21,9 @@ class MockLogsPaginator:
 class MockLogsClient:
     def __init__(self, paginator=None):
         self.paginator = paginator if paginator is not None else MockLogsPaginator()
+        self.meta = namedtuple("meta", "events")._make(
+            [namedtuple("events", "register_first")._make([lambda _, __: None])]
+        )
 
     def get_paginator(self, name):
         return self.paginator

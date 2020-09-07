@@ -180,7 +180,7 @@ description = "A simple logging library with JSON log formatting"
 name = "logtron"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-version = "0.1.9"
+version = "0.1.10"
 
 [package.dependencies]
 importlib-metadata = ">=1.7.0,<2.0.0"
@@ -561,8 +561,8 @@ jmespath = [
     {file = "jmespath-0.10.0.tar.gz", hash = "sha256:b85d0567b8666149a93172712e68920734333c0ce7e89b78b3e987f71e5ed4f9"},
 ]
 logtron = [
-    {file = "logtron-0.1.9-py2.py3-none-any.whl", hash = "sha256:c187332ba995055c9706321531834c31b23f483aa6b90626aba1dd7b7a1aaba2"},
-    {file = "logtron-0.1.9.tar.gz", hash = "sha256:d5abcecb51e1af9e8293c0b6bc7bf538855a4561c7848ba9ec3bf78286fbe0c7"},
+    {file = "logtron-0.1.10-py2.py3-none-any.whl", hash = "sha256:ad1671e0226c6bafb3ebeb9cc47a9f633f76e9897728ed47bdcd9bf6ae9d6be3"},
+    {file = "logtron-0.1.10.tar.gz", hash = "sha256:b4264f1bc8401971196dd89e82e020fb0a25b6ca9c898f16f70681e5b54db3b3"},
 ]
 more-itertools = [
     {file = "more-itertools-5.0.0.tar.gz", hash = "sha256:38a936c0a6d98a38bcc2d03fdaaedaba9f412879461dd2ceff8d37564d6522e4"},
