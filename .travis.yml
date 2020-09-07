@@ -15,13 +15,14 @@ stages:
 
 before_install:
   - pip install --upgrade pip
-  - pip install poetry
+  - pip install --user poetry
+  - pip install --user codecov
 install:
   - poetry install --no-root -v
 script:
   - make ci
   - make cover
-  - bash <(curl -s https://codecov.io/bash)
+#  - bash <(curl -s https://codecov.io/bash)
 
 jobs:
   include:
@@ -36,3 +37,6 @@ jobs:
         script: poetry publish -u __token__ -p $PYPI_PASSWORD -n --build
         on:
           tags: true
+
+after_success:
+  - codecov
