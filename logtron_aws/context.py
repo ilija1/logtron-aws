@@ -9,7 +9,7 @@ def discover_context(sts_client=None, refresh=False):
     if cached_context is not None and not refresh:
         return cached_context
 
-    # TODO: see if you can identify lambda, glue, batch, ec2, etc
+    # TODO: identify lambda, glue, batch, ec2, etc
 
     sts_client = sts_client if sts_client is not None else boto3.client("sts")
     response = sts_client.get_caller_identity()

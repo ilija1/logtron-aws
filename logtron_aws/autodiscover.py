@@ -64,5 +64,5 @@ def autodiscover(name=None, level=logging.INFO, **kwargs):
         refresh=refresh,
         flatten=flatten,
         discover_context=discover_context,
-        **kwargs,
+        **kwargs
     )
