@@ -31,7 +31,6 @@ jobs:
       dist: xenial
       python: "3.8"
       script: skip
-      after_success: skip
       deploy:
         provider: script
         script: poetry publish -u __token__ -p $PYPI_PASSWORD -n --build
