@@ -5,7 +5,10 @@ import time
 from logging import Handler
 from uuid import uuid4
 
-import boto3
+try:
+    import boto3
+except:
+    boto3 = None
 
 from logtron_aws.util import path_get
 
