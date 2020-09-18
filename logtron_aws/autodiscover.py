@@ -1,5 +1,4 @@
 import logging
-from copy import deepcopy
 
 from logtron import autodiscover as autodiscover_base
 from logtron.config import discover_config
@@ -30,10 +29,6 @@ def autodiscover(name=None, level=logging.INFO, **kwargs):
     logs_client = kwargs.pop("logs_client", None)
     sts_client = kwargs.pop("sts_client", None)
     config = kwargs.pop("config", {})
-    use_deepcopy = config.get("use_deepcopy", logs_client is None)
-    config["use_deepcopy"] = use_deepcopy
-    if use_deepcopy:
-        config = deepcopy(config)
     discover_context = kwargs.pop("discover_context", None)
     flatten = kwargs.pop("flatten", __has_emf(config))
 
