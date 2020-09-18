@@ -27,9 +27,13 @@ def autodiscover(name=None, level=logging.INFO, **kwargs):
     if not refresh and is_configured:
         return logging.getLogger(name)
 
-    config = deepcopy(kwargs.pop("config", {}))
     logs_client = kwargs.pop("logs_client", None)
     sts_client = kwargs.pop("sts_client", None)
+    config = kwargs.pop("config", {})
+    use_deepcopy = config.get("use_deepcopy", logs_client is None)
+    config["use_deepcopy"] = use_deepcopy
+    if use_deepcopy:
+        config = deepcopy(config)
     discover_context = kwargs.pop("discover_context", None)
     flatten = kwargs.pop("flatten", __has_emf(config))
 
