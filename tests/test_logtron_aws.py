@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-from logtron_aws import CloudWatchHandler, autodiscover, discover_context
+from logtron_aws import CloudWatchHandler, autodiscover, discover_context, flush
 from tests.mocks import MockLogsClient, MockLogsPaginator, MockSTSClient
 
 
@@ -35,7 +35,7 @@ def test_empty_config():
         discover_context=lambda: discover_context(sts_client=MockSTSClient(), refresh=True),
     )
     logger.info("test_empty_config")
-    [i.flush() for i in logging.getLogger().handlers]
+    flush()
 
 
 def test_autodiscover_repeat():
@@ -63,7 +63,7 @@ def test_cloudwatch():
     )
     logger.info("test_cloudwatch", extra={"test123": 123})
 
-    [i.flush() for i in logging.getLogger().handlers]
+    flush()
 
 
 def test_cloudwatch_default_handler():
@@ -78,7 +78,7 @@ def test_cloudwatch_default_handler():
     )
     logger.info("test_cloudwatch_default_handler", extra={"test123": 123})
 
-    [i.flush() for i in logging.getLogger().handlers]
+    flush()
 
 
 def test_cloudwatch_logs_client():
@@ -96,7 +96,7 @@ def test_cloudwatch_logs_client():
     )
     logger.info("test_cloudwatch_logs_client", extra={"test123": 123})
 
-    [i.flush() for i in logging.getLogger().handlers]
+    flush()
 
 
 def test_cloudwatch_emf():
@@ -124,7 +124,7 @@ def test_cloudwatch_emf():
     )
     logger.info("test_cloudwatch_emf", extra={"kind": "test", "value": 123})
 
-    [i.flush() for i in logging.getLogger().handlers]
+    flush()
 
 
 def test_cloudwatch_emf_detect_ns():
@@ -151,7 +151,7 @@ def test_cloudwatch_emf_detect_ns():
     )
     logger.info("test_cloudwatch_emf_detect_ns", extra={"kind": "test", "value": 123})
 
-    [i.flush() for i in logging.getLogger().handlers]
+    flush()
 
 
 def test_cloudwatch_emf_non_flatten():
@@ -181,7 +181,7 @@ def test_cloudwatch_emf_non_flatten():
     )
     logger.info("test_cloudwatch_emf_non_flatten", extra={"kind": "test", "value": 123})
 
-    [i.flush() for i in logging.getLogger().handlers]
+    flush()
 
 
 def test_cloudwatch_sts_client():
@@ -195,7 +195,7 @@ def test_cloudwatch_sts_client():
     logger = autodiscover(refresh=True, config=config, sts_client=MockSTSClient())
     logger.info("test_cloudwatch_sts_client", extra={"test123": 123})
 
-    [i.flush() for i in logging.getLogger().handlers]
+    flush()
 
 
 def test_cloudwatch_close():
@@ -211,7 +211,8 @@ def test_cloudwatch_close():
     )
     logger.info("test_cloudwatch_close", extra={"test123": 123})
 
-    [i.close() for i in logging.getLogger().handlers]
+    for i in logging.getLogger().handlers:
+        i.close()
 
 
 def test_cloudwatch_existing_log_group():
@@ -227,4 +228,4 @@ def test_cloudwatch_existing_log_group():
     )
     logger.info("test_cloudwatch_existing_log_group", extra={"test123": 123})
 
-    [i.flush() for i in logging.getLogger().handlers]
+    flush()
