@@ -15,7 +15,8 @@ def discover_context(sts_client=None, refresh=False):
 
     # TODO: identify lambda, glue, batch, ec2, etc
 
-    sts_client = sts_client if sts_client is not None else boto3.client("sts")
+    if sts_client is None:
+        sts_client = boto3.client("sts")
     response = sts_client.get_caller_identity()
     arn = response["Arn"]
     last_part = arn.split(":")[-1]
