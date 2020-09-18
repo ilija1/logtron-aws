@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-from logtron_aws import autodiscover
+from logtron_aws import autodiscover, flush
 
 
 @pytest.mark.skip(reason="integration test -- will submit real logs")
@@ -27,4 +27,4 @@ def test_integration():
     logger = autodiscover(refresh=True, config=config)
     logger.info("test_integration", extra={"kind": "test", "value": 123})
 
-    [i.flush() for i in logging.getLogger().handlers]
+    flush()

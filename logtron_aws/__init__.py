@@ -1,4 +1,5 @@
 from importlib_metadata import version
+from logtron import flush
 
 from logtron_aws.autodiscover import autodiscover
 from logtron_aws.cloudwatch import CloudWatchHandler
