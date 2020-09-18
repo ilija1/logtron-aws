@@ -3,6 +3,8 @@ import logging
 from logtron import autodiscover as autodiscover_base
 from logtron.config import discover_config
 
+from logtron_aws.context import discover_context as discover_context_base
+
 DEFAULT_HANDLER_FULL_PATH = "logtron_aws.cloudwatch.CloudWatchHandler"
 DEFAULT_HANDLER_CLASS = "CloudWatchHandler"
 
@@ -47,12 +49,7 @@ def autodiscover(name=None, level=logging.INFO, **kwargs):
         )
 
     if discover_context is None:
-        from logtron_aws import discover_context as discover_context_base
-
-        def __discover_context():
-            return discover_context_base(sts_client=sts_client, refresh=refresh)
-
-        discover_context = __discover_context
+        discover_context = lambda: discover_context_base(sts_client=sts_client, refresh=refresh)
 
     is_configured = True
 
