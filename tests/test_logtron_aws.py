@@ -211,7 +211,8 @@ def test_cloudwatch_close():
     )
     logger.info("test_cloudwatch_close", extra={"test123": 123})
 
-    flush()
+    for i in logging.getLogger().handlers:
+        i.close()
 
 
 def test_cloudwatch_existing_log_group():
