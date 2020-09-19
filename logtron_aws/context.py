@@ -1,9 +1,3 @@
-try:
-    import boto3
-except:
-    boto3 = None
-
-
 cached_context = None
 
 
@@ -16,6 +10,8 @@ def discover_context(sts_client=None, refresh=False):
     # TODO: identify lambda, glue, batch, ec2, etc
 
     if sts_client is None:
+        import boto3
+
         sts_client = boto3.client("sts")
     response = sts_client.get_caller_identity()
     arn = response["Arn"]

@@ -5,11 +5,6 @@ import time
 from logging import Handler
 from uuid import uuid4
 
-try:
-    import boto3
-except:
-    boto3 = None
-
 from logtron_aws.util import path_get
 
 
@@ -26,6 +21,8 @@ class CloudWatchHandler(Handler):
         self.retention_days = kwargs.get("retention_days")
         self.client = kwargs.get("logs_client")
         if self.client is None:
+            import boto3
+
             self.client = boto3.client("logs")
         self.emf_namespace = kwargs.get("emf_namespace")
         self.emf_dimensions = kwargs.get("emf_dimensions", [])
@@ -36,9 +33,11 @@ class CloudWatchHandler(Handler):
         self.log_stream = None
         self.sequence_token = None
 
-        thread = threading.Thread(target=self.__timed_submit, args=())
-        thread.daemon = True
-        thread.start()
+        self.use_threading = kwargs.get("use_threading", True)
+        if self.use_threading:
+            thread = threading.Thread(target=self.__timed_submit, args=())
+            thread.daemon = True
+            thread.start()
 
     def __create_log_group(self, record):
         if self.log_group_initialized:

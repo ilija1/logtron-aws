@@ -99,6 +99,25 @@ def test_cloudwatch_logs_client():
     flush()
 
 
+def test_cloudwatch_no_threading():
+    config = {
+        "handlers": ["logtron_aws.CloudWatchHandler"],
+        "CloudWatchHandler": {
+            "interval_sec": 30,
+        },
+    }
+    logger = autodiscover(
+        refresh=True,
+        use_threading=False,
+        logs_client=MockLogsClient(),
+        config=config,
+        discover_context=lambda: discover_context(sts_client=MockSTSClient(), refresh=True),
+    )
+    logger.info("test_cloudwatch_no_threading", extra={"test123": 123})
+
+    flush()
+
+
 def test_cloudwatch_emf():
     config = {
         "handlers": ["logtron_aws.CloudWatchHandler"],
