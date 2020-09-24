@@ -1,0 +1,1 @@
+__NUXT_JSONP__("/content/configuration", {data:[{page:{title:"Configuration",toc:[],body:{type:"root",children:[]},dir:"\u002F",path:"\u002Fconfiguration",extension:".md",slug:"configuration",createdAt:"2020-09-24T12:49:46.010Z",updatedAt:"2020-09-24T13:29:48.260Z"}}],fetch:[],mutations:void 0});

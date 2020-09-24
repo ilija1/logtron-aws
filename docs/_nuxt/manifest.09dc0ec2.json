@@ -1,0 +1,11 @@
+{
+  "name": "logtron-aws",
+  "short_name": "logtron-aws",
+  "description": "## Build Setup",
+  "icons": [],
+  "start_url": "/logtron-aws/?standalone=true",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "black",
+  "lang": "en"
+}

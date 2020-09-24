@@ -1,0 +1,50 @@
+@import 'bulmaswatch/bulmaswatch';
+
+.nuxt-content h1 {
+  @extend .title;
+  @extend .is-3;
+}
+
+.nuxt-content h2 {
+  margin-top: 20px;
+  @extend .subtitle;
+  @extend .is-5;
+}
+
+.nuxt-content h3 {
+  margin-top: 20px;
+  @extend .subtitle;
+  @extend .is-6;
+}
+
+.nuxt-content p {
+  line-height: 2.5em;
+}
+
+article.content h2.subtitle.toc {
+  margin-top: 1em;
+  margin-bottom: 0;
+}
+
+article.content ul.toc {
+  list-style-type: none;
+  margin-left: 0.75em;
+}
+
+article.content li.toc2 {
+  color: $grey-lighter;
+}
+
+article.content li.toc3 {
+  font-size: 0.9em;
+  margin-left: 1em;
+  color: $grey-light;
+}
+
+$icon-size: 0;
+.icon.icon-link {
+  display: inline-block;
+  width: $icon-size;
+  height: $icon-size;
+  background-size: $icon-size $icon-size;
+}

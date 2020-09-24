@@ -14,3 +14,18 @@ ci: clean
 .PHONY: cover
 cover: clean
 	poetry run pytest --cov-config .coveragerc --verbose --cov-report term --cov-report xml --cov=logtron_aws tests
+
+.PHONY: clean-docs
+clean-docs:
+	@rm -rf docs
+	@mkdir -p docs
+
+.PHONY: docs
+docs: clean-docs
+	@cd docs-src && npm run generate
+	@cp -R docs-src/dist/* docs/
+
+.PHONY: serve-docs
+serve-docs:
+	@cd docs-src && npm install
+	@cd docs-src && npm run dev
