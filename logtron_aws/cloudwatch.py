@@ -65,8 +65,8 @@ class CloudWatchHandler(Handler):
                 self.client.put_retention_policy(logGroupName=self.log_group, retentionInDays=self.retention_days)
         self.log_group_initialized = True
 
-    def __create_log_stream(self, record):
-        if not self.log_group_initialized:
+    def __create_log_stream(self, record=None):
+        if not self.log_group_initialized and record is not None:
             self.__create_log_group(record)
 
         if self.log_stream is not None:
@@ -101,7 +101,14 @@ class CloudWatchHandler(Handler):
             self.client.meta.events.register_first("before-sign.cloudwatch-logs.PutLogEvents", self.__add_emf_header)
             self.emf_header_registered = True
 
-        response = self.client.put_log_events(**args)
+        response = None
+        try:
+            response = self.client.put_log_events(**args)
+        except self.client.exceptions.ResourceNotFoundException:
+            self.log_stream = None
+            self.__create_log_stream()
+            response = self.client.put_log_events(**args)
+
         self.sequence_token = response["nextSequenceToken"]
 
         self.batch = []

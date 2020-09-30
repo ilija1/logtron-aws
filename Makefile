@@ -5,15 +5,15 @@ clean:
 
 .PHONY: test
 test: clean
-	poetry run pytest -s
+	poetry run pytest --ignore=docs-src -s
 
 .PHONY: ci
 ci: clean
-	poetry run pytest --junitxml=report.xml
+	poetry run pytest --ignore=docs-src --junitxml=report.xml
 
 .PHONY: cover
 cover: clean
-	poetry run pytest --cov-config .coveragerc --verbose --cov-report term --cov-report xml --cov=logtron_aws tests
+	poetry run pytest  --ignore=docs-src --cov-config .coveragerc --verbose --cov-report term --cov-report xml --cov=logtron_aws tests
 
 .PHONY: clean-docs
 clean-docs:
