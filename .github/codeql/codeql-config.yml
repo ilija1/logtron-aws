@@ -4,5 +4,5 @@ paths-ignore:
   - node_modules
   - "**/*.test.js"
 paths:
-  - logtron-aws
+  - logtron_aws
   - docs-src
